@@ -17,7 +17,7 @@ const (
 
 func main() {
 	fmt.Printf("HTTP GET : %s\n", HcpcsZipUrl)
-	code, file, err := http.SimpleGet(HcpcsZipUrl)
+	code, file, _, err := http.SimpleGet(HcpcsZipUrl)
 	if err != nil {
 		panic(err)
 	}
