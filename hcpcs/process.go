@@ -1,12 +1,10 @@
 package main
 
 import (
-	"archive/zip"
-	"bytes"
 	"fmt"
+	"github.com/freemed/freemed-data/common"
 	fixed "github.com/jbuchbinder/gofixedfield"
 	http "github.com/jbuchbinder/gosimplehttp"
-	"io"
 	"strings"
 )
 
@@ -17,7 +15,7 @@ const (
 
 func main() {
 	fmt.Printf("HTTP GET : %s\n", HcpcsZipUrl)
-	code, file, err := http.SimpleGet(HcpcsZipUrl)
+	code, file, _, err := http.SimpleGet(HcpcsZipUrl)
 	if err != nil {
 		panic(err)
 	}
@@ -27,7 +25,7 @@ func main() {
 	}
 
 	fmt.Printf("Extract file %s from archive\n", HcpcsFile)
-	contents, err := FileFromZipArchive(file, HcpcsFile)
+	contents, err := common.FileFromZipArchive(file, HcpcsFile)
 	if err != nil {
 		panic(err)
 	}
@@ -48,29 +46,4 @@ func main() {
 		}
 	}
 
-}
-
-func FileFromZipArchive(data []byte, filename string) ([]byte, error) {
-	br := bytes.NewReader(data)
-	zr, err := zip.NewReader(br, int64(len(data)))
-	if err != nil {
-		return nil, err
-	}
-	for _, f := range zr.File {
-		fmt.Printf("Found file '%s'\n", f.Name)
-		if f.Name == filename {
-			rc, err := f.Open()
-			if err != nil {
-				return nil, err
-			}
-			defer rc.Close()
-			contents := make([]byte, f.UncompressedSize)
-			_, err = io.ReadFull(rc, contents)
-			if err != nil {
-				return nil, err
-			}
-			return contents, nil
-		}
-	}
-	return nil, nil
 }
