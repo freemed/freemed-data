@@ -16,6 +16,7 @@ const (
 )
 
 var (
+	Debug     = flag.Bool("debug", false, "Show debugging information")
 	SqlOutput = flag.Bool("sql", false, "Output SQL")
 	LocalFile = flag.String("local-file", "", "Read from local ZIP source")
 )
@@ -28,13 +29,15 @@ func main() {
 	flag.Parse()
 
 	if *LocalFile == "" {
-		fmt.Printf("HTTP GET : %s\n", NdcZipUrl)
+		if *Debug {
+			fmt.Printf("## HTTP GET : %s\n", NdcZipUrl)
+		}
 		code, file, _, err = http.SimpleGet(NdcZipUrl)
 		if err != nil {
 			panic(err)
 		}
 		if code > 299 {
-			fmt.Printf("HTTP request got result code %d\n", code)
+			fmt.Printf("## HTTP request got result code %d\n", code)
 			return
 		}
 	} else {
@@ -44,12 +47,16 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Extract product file %s from archive\n", NdcProductFile)
-	contents, err := common.FileFromZipArchive(file, NdcProductFile)
+	if *Debug {
+		fmt.Printf("## Extract product file %s from archive\n", NdcProductFile)
+	}
+	contents, err := common.FileFromZipArchive(file, NdcProductFile, *Debug)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Decompressed %d bytes from ZIP archive\n", len(contents))
+	if *Debug {
+		fmt.Printf("## Decompressed %d bytes from ZIP archive\n", len(contents))
+	}
 	r := csv.NewReader(strings.NewReader(string(contents)))
 	r.Comma = '\t'
 	r.LazyQuotes = true
