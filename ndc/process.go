@@ -65,6 +65,22 @@ func main() {
 		panic(err)
 	}
 
+	// Adjust all date/time values
+	for idx, _ := range rec {
+		if rec[idx][8] == "" {
+			rec[idx][8] = "NULL"
+		} else {
+			x := rec[idx][8]
+			rec[idx][8] = x[0:4] + "-" + x[4:6] + "-" + x[6:8]
+		}
+		if rec[idx][9] == "" {
+			rec[idx][9] = "NULL"
+		} else {
+			x := rec[idx][9]
+			rec[idx][9] = x[0:4] + "-" + x[4:6] + "-" + x[6:8]
+		}
+	}
+
 	if *SqlOutput {
 		fmt.Printf(SqlPreamble)
 		common.InsertsFromArrays("ndc", []string{
@@ -74,21 +90,37 @@ func main() {
 			"ProprietaryName",
 			"ProprietaryNameSuffix",
 			"NonProprietaryName",
-			"DosageFormName",
-			"RouteName",
-			"StartMarketingDate",
-			"EndMarketingDate",
+			"DosageFormName",     // [6]
+			"RouteName",          // [7]
+			"StartMarketingDate", // [8]
+			"EndMarketingDate",   // [9]
 			"MarketingCategoryName",
 			"ApplicationNumber",
 			"LabelerName",
 			"SubstanceName",
 			"StrengthNumber",
-			"StrengthUnit",
-			"PharmClasses",
+			"StrengthUnit", // [15]
+			"PharmClasses", // [16]
 			"DEASchedule",
-		}, rec)
+		}, rec[1:])
+		common.InsertsFromArrays("ndcDosageForm", []string{
+			"DosageFormName",
+		}, common.OneToMultiArray(Derivatives(rec[1:], 6, ";")))
+		common.InsertsFromArrays("ndcRoute", []string{
+			"RouteName",
+		}, common.OneToMultiArray(Derivatives(rec[1:], 7, ";")))
+		common.InsertsFromArrays("ndcStrengthUnit", []string{
+			"StrengthUnit",
+		}, common.OneToMultiArray(Derivatives(rec[1:], 15, ";")))
+		common.InsertsFromArrays("ndcPharmClass", []string{
+			"PharmClassName",
+		}, common.OneToMultiArray(Derivatives(rec[1:], 16, ";")))
 		return
 	}
 
+	fmt.Printf("DosageForm : %#v\n", Derivatives(rec[1:], 6, ";"))
+	fmt.Printf("Route : %#v\n", Derivatives(rec[1:], 7, ";"))
+	fmt.Printf("StrengthUnit : %#v\n", Derivatives(rec[1:], 15, ";"))
+	fmt.Printf("PharmClasses : %#v\n", Derivatives(rec[1:], 16, ","))
 	//fmt.Printf("%#v", rec[1:])
 }

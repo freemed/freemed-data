@@ -7,21 +7,21 @@ CREATE TABLE ndc (
 	  ProductID             VARCHAR(128) NOT NULL
 	, ProductNDC            VARCHAR(128) NOT NULL
 	, ProductTypeName       VARCHAR(128) NOT NULL
-	, ProprietaryName       VARCHAR(128) NOT NULL
+	, ProprietaryName       VARCHAR(1024) NOT NULL
 	, ProprietaryNameSuffix VARCHAR(128)
-	, NonProprietaryName    VARCHAR(128)
+	, NonProprietaryName    TEXT
 	, DosageFormName        VARCHAR(128)
-	, RouteName             VARCHAR(128)
-	, StartMarketingDate    TIMESTAMP NULL
-	, EndMarketingDate      TIMESTAMP NULL
+	, RouteName             VARCHAR(1024)
+	, StartMarketingDate    DATE NULL
+	, EndMarketingDate      DATE NULL
 	, MarketingCategoryName VARCHAR(128)
 	, ApplicationNumber     VARCHAR(128)
-	, LabelerName           VARCHAR(128)
-	, SubstanceName         VARCHAR(128)
-	, StrengthNumber        VARCHAR(100)
-	, StrengthUnit          VARCHAR(128)
-	, PharmClasses          VARCHAR(128)
-	, DEASchedule           CHAR(5)
+	, LabelerName           VARCHAR(128) CHARACTER SET utf8
+	, SubstanceName         TEXT
+	, StrengthNumber        TEXT
+	, StrengthUnit          TEXT
+	, PharmClasses          TEXT
+	, DEASchedule           ENUM ( '', 'CI', 'CII', 'CIII', 'CIV', 'CV' ) NOT NULL DEFAULT ''
 
 	, INDEX                ( ProductID )
 	, INDEX                ( ProductNDC )
