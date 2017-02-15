@@ -34,6 +34,8 @@ func main() {
 		return
 	}
 
+	// ----- INGEST DATA -----
+
 	if *LocalFile == "" {
 		if *Debug {
 			fmt.Printf("## HTTP GET : %s\n", NdcZipUrl)
@@ -87,6 +89,8 @@ func main() {
 		}
 	}
 
+	// ----- EXPORT DATA -----
+
 	if *TsvMode {
 		fmt.Println("* Using TSV Mode")
 
@@ -106,32 +110,77 @@ func main() {
 			// Create mode : blast data out to files
 
 			fmt.Println(" - Writing new ndc.tsv")
-			err := common.TsvFromArrays("data/ndc.tsv", common.PrependUniqueIds(rec))
+			err := common.TsvFromArrays(
+				"data/ndc.tsv",
+				common.PrependUniqueIds(
+					rec,
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
 			fmt.Println(" - Writing new route.tsv")
-			err = common.TsvFromArrays("data/route.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"))))
+			err = common.TsvFromArrays(
+				"data/route.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";")),
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
+
 			fmt.Println(" - Writing new producttype.tsv")
-			err = common.TsvFromArrays("data/producttype.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";"))))
+			err = common.TsvFromArrays(
+				"data/producttype.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";")),
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
+
 			fmt.Println(" - Writing new dosageform.tsv")
-			err = common.TsvFromArrays("data/dosageform.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"))))
+			err = common.TsvFromArrays(
+				"data/dosageform.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";")),
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
+
 			fmt.Println(" - Writing new strengthunit.tsv")
-			err = common.TsvFromArrays("data/strengthunit.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"))))
+			err = common.TsvFromArrays(
+				"data/strengthunit.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";")),
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
+
 			fmt.Println(" - Writing new pharmclass.tsv")
-			err = common.TsvFromArrays("data/pharmclass.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","))))
+			err = common.TsvFromArrays(
+				"data/pharmclass.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 16, ",")),
+				),
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Println(" - Writing new drugname.tsv")
+			err = common.TsvFromArrays(
+				"data/drugname.tsv",
+				common.PrependUniqueIds(
+					common.OneToMultiArray(common.Derivatives(rec[1:], 3, ";")),
+				),
+			)
 			if err != nil {
 				panic(err)
 			}
