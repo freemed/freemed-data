@@ -18,6 +18,7 @@ const (
 var (
 	Debug     = flag.Bool("debug", false, "Show debugging information")
 	SqlOutput = flag.Bool("sql", false, "Output SQL")
+	TsvMode   = flag.Bool("tsv", false, "TSV build/refresh mode")
 	LocalFile = flag.String("local-file", "", "Read from local ZIP source")
 )
 
@@ -27,6 +28,11 @@ func main() {
 	var err error
 
 	flag.Parse()
+
+	if *TsvMode && *SqlOutput {
+		flag.PrintDefaults()
+		return
+	}
 
 	if *LocalFile == "" {
 		if *Debug {
@@ -81,13 +87,66 @@ func main() {
 		}
 	}
 
+	if *TsvMode {
+		fmt.Println("* Using TSV Mode")
+
+		// Determine whether or not we're updating or not ...
+		updateMode := false
+		if common.FileExists("data/route.tsv") {
+			updateMode = true
+			fmt.Println(" * Detected update mode")
+		}
+
+		if updateMode {
+			// Update mode :
+			// Read all files
+			// Combine data
+			// Push out data to TSV files
+		} else {
+			// Create mode : blast data out to files
+
+			fmt.Println(" - Writing new ndc.tsv")
+			err := common.TsvFromArrays("data/ndc.tsv", common.PrependUniqueIds(rec))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(" - Writing new route.tsv")
+			err = common.TsvFromArrays("data/route.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"))))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(" - Writing new producttype.tsv")
+			err = common.TsvFromArrays("data/producttype.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";"))))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(" - Writing new dosageform.tsv")
+			err = common.TsvFromArrays("data/dosageform.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"))))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(" - Writing new strengthunit.tsv")
+			err = common.TsvFromArrays("data/strengthunit.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"))))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(" - Writing new pharmclass.tsv")
+			err = common.TsvFromArrays("data/pharmclass.tsv", common.PrependUniqueIds(common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","))))
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		return
+	}
+
 	if *SqlOutput {
 		fmt.Printf(SqlPreamble)
 		common.InsertsFromArrays("ndc", []string{
 			"ProductID",
 			"ProductNDC",
-			"ProductTypeName",
-			"ProprietaryName",
+			"ProductTypeName", // [2]
+			"ProprietaryName", // [3]
 			"ProprietaryNameSuffix",
 			"NonProprietaryName",
 			"DosageFormName",     // [6]
@@ -105,22 +164,22 @@ func main() {
 		}, rec[1:])
 		common.InsertsFromArrays("ndcDosageForm", []string{
 			"DosageFormName",
-		}, common.OneToMultiArray(Derivatives(rec[1:], 6, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";")))
 		common.InsertsFromArrays("ndcRoute", []string{
 			"RouteName",
-		}, common.OneToMultiArray(Derivatives(rec[1:], 7, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";")))
 		common.InsertsFromArrays("ndcStrengthUnit", []string{
 			"StrengthUnit",
-		}, common.OneToMultiArray(Derivatives(rec[1:], 15, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";")))
 		common.InsertsFromArrays("ndcPharmClass", []string{
 			"PharmClassName",
-		}, common.OneToMultiArray(Derivatives(rec[1:], 16, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 16, ",")))
 		return
 	}
 
-	fmt.Printf("DosageForm : %#v\n", Derivatives(rec[1:], 6, ";"))
-	fmt.Printf("Route : %#v\n", Derivatives(rec[1:], 7, ";"))
-	fmt.Printf("StrengthUnit : %#v\n", Derivatives(rec[1:], 15, ";"))
-	fmt.Printf("PharmClasses : %#v\n", Derivatives(rec[1:], 16, ","))
+	fmt.Printf("DosageForm : %#v\n", common.Derivatives(rec[1:], 6, ";"))
+	fmt.Printf("Route : %#v\n", common.Derivatives(rec[1:], 7, ";"))
+	fmt.Printf("StrengthUnit : %#v\n", common.Derivatives(rec[1:], 15, ";"))
+	fmt.Printf("PharmClasses : %#v\n", common.Derivatives(rec[1:], 16, ","))
 	//fmt.Printf("%#v", rec[1:])
 }
