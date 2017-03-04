@@ -25,12 +25,16 @@ func InsertsFromArrays(table string, fields []string, data [][]string) {
 	}
 }
 
-func OneToMultiArray(src []string) [][]string {
+func OneToMultiArray(src []string, forceUppercase bool) [][]string {
 	dest := [][]string{}
 
 	for iter, _ := range src {
 		if src[iter] != "" {
-			dest = append(dest, []string{src[iter]})
+			if forceUppercase {
+				dest = append(dest, []string{strings.ToUpper(src[iter])})
+			} else {
+				dest = append(dest, []string{src[iter]})
+			}
 		}
 	}
 

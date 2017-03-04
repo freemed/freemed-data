@@ -123,7 +123,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/route.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"), true),
 				),
 			)
 			if err != nil {
@@ -134,7 +134,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/producttype.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";"), true),
 				),
 			)
 			if err != nil {
@@ -145,7 +145,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/dosageform.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"), true),
 				),
 			)
 			if err != nil {
@@ -156,7 +156,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/strengthunit.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"), true),
 				),
 			)
 			if err != nil {
@@ -167,7 +167,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/pharmclass.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 16, ",")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","), true),
 				),
 			)
 			if err != nil {
@@ -178,7 +178,7 @@ func main() {
 			err = common.TsvFromArrays(
 				"data/drugname.tsv",
 				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 3, ";")),
+					common.OneToMultiArray(common.Derivatives(rec[1:], 3, ";"), true),
 				),
 			)
 			if err != nil {
@@ -213,16 +213,16 @@ func main() {
 		}, rec[1:])
 		common.InsertsFromArrays("ndcDosageForm", []string{
 			"DosageFormName",
-		}, common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"), true))
 		common.InsertsFromArrays("ndcRoute", []string{
 			"RouteName",
-		}, common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"), true))
 		common.InsertsFromArrays("ndcStrengthUnit", []string{
 			"StrengthUnit",
-		}, common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"), true))
 		common.InsertsFromArrays("ndcPharmClass", []string{
 			"PharmClassName",
-		}, common.OneToMultiArray(common.Derivatives(rec[1:], 16, ",")))
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","), true))
 		return
 	}
 
