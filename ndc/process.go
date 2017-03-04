@@ -115,46 +115,12 @@ func main() {
 				panic(err)
 			}
 
-			// route.tsv
-			{
-				fmt.Println(" - Ingesting route.tsv")
-				raw, err := common.ReadTsv("data/route.tsv")
-				if err != nil {
-					panic(err)
-				}
-				newData := false
-				corpus := common.Derivatives(raw, 1, ";")
-				updates := common.Derivatives(rec[1:], 7, ";")
-				keys := common.CoerceSliceStringToInt(common.Derivatives(raw, 0, ";"))
-				maxVal := common.MaxIntSlice(keys)
-				for _, u := range updates {
-					uc := strings.TrimSpace(strings.ToUpper(u))
-					if uc == "" {
-						continue
-					}
-					if !common.HasElement(corpus, uc) {
-						newData = true
-						maxVal++
-						fmt.Printf(" ! Found new element '%s' (%d)\n", uc, maxVal)
-						raw = append(raw, []string{fmt.Sprintf("%d", maxVal), uc})
-						corpus = append(corpus, uc)
-					}
-				}
-
-				// Push out to TSV
-				if newData {
-					fmt.Println(" - Writing updated route.tsv")
-					err = common.TsvFromArrays(
-						"data/route.tsv",
-						raw,
-					)
-					if err != nil {
-						panic(err)
-					}
-				} else {
-					fmt.Println(" - No new data to write to routes.tsv")
-				}
-			}
+			mergeTsv("route.tsv", rec, 7, ";")
+			mergeTsv("producttype.tsv", rec, 2, ";")
+			mergeTsv("dosageform.tsv", rec, 6, ";")
+			mergeTsv("strengthunit.tsv", rec, 15, ";")
+			mergeTsv("pharmclass.tsv", rec, 16, ",")
+			mergeTsv("drugname.tsv", rec, 3, ";")
 		} else {
 			// Create mode : blast data out to files
 
@@ -280,4 +246,53 @@ func main() {
 	fmt.Printf("StrengthUnit : %#v\n", common.Derivatives(rec[1:], 15, ";"))
 	fmt.Printf("PharmClasses : %#v\n", common.Derivatives(rec[1:], 16, ","))
 	//fmt.Printf("%#v", rec[1:])
+}
+
+func mergeTsv(tsvFile string, rec [][]string, sourceField int, delim string) {
+	fmt.Printf(" - Ingesting %s\n", tsvFile)
+	raw, err := common.ReadTsv("data/" + tsvFile)
+	if err != nil {
+		panic(err)
+	}
+	newData := false
+	newEntries := 0
+	corpus := common.Derivatives(raw, 1, delim)
+	updates := common.Derivatives(rec[1:], sourceField, delim)
+	keys := common.CoerceSliceStringToInt(common.Derivatives(raw, 0, delim))
+	maxVal := common.MaxIntSlice(keys)
+	for _, u := range updates {
+		uc := strings.TrimSpace(strings.ToUpper(u))
+		if uc == "" {
+			continue
+		}
+
+		pieces := strings.Split(uc, delim)
+		for _, piece := range pieces {
+			piece = strings.TrimSpace(piece)
+			if !common.HasElement(corpus, piece) {
+				newData = true
+				maxVal++
+				newEntries++
+				if *Debug {
+				fmt.Printf(" ! Found new element '%s' (%d)\n", piece, maxVal)
+				}
+				raw = append(raw, []string{fmt.Sprintf("%d", maxVal), piece})
+				corpus = append(corpus, piece)
+			}
+		}
+	}
+
+	// Push out to TSV
+	if newData {
+		fmt.Printf(" - Writing updated %s with %d new entries\n", tsvFile, newEntries)
+		err = common.TsvFromArrays(
+			"data/"+tsvFile,
+			raw,
+		)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		fmt.Printf(" - No new data to write to %s\n", tsvFile)
+	}
 }
