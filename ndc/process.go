@@ -103,9 +103,58 @@ func main() {
 
 		if updateMode {
 			// Update mode :
-			// Read all files
-			// Combine data
-			// Push out data to TSV files
+
+			fmt.Println(" - Rewriting new ndc.tsv")
+			err := common.TsvFromArrays(
+				"data/ndc.tsv",
+				common.PrependUniqueIds(
+					rec,
+				),
+			)
+			if err != nil {
+				panic(err)
+			}
+
+			// route.tsv
+			{
+				fmt.Println(" - Ingesting route.tsv")
+				raw, err := common.ReadTsv("data/route.tsv")
+				if err != nil {
+					panic(err)
+				}
+				newData := false
+				corpus := common.Derivatives(raw, 1, ";")
+				updates := common.Derivatives(rec[1:], 7, ";")
+				keys := common.CoerceSliceStringToInt(common.Derivatives(raw, 0, ";"))
+				maxVal := common.MaxIntSlice(keys)
+				for _, u := range updates {
+					uc := strings.TrimSpace(strings.ToUpper(u))
+					if uc == "" {
+						continue
+					}
+					if !common.HasElement(corpus, uc) {
+						newData = true
+						maxVal++
+						fmt.Printf(" ! Found new element '%s' (%d)\n", uc, maxVal)
+						raw = append(raw, []string{fmt.Sprintf("%d", maxVal), uc})
+						corpus = append(corpus, uc)
+					}
+				}
+
+				// Push out to TSV
+				if newData {
+					fmt.Println(" - Writing updated route.tsv")
+					err = common.TsvFromArrays(
+						"data/route.tsv",
+						raw,
+					)
+					if err != nil {
+						panic(err)
+					}
+				} else {
+					fmt.Println(" - No new data to write to routes.tsv")
+				}
+			}
 		} else {
 			// Create mode : blast data out to files
 

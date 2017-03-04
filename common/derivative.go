@@ -1,6 +1,8 @@
 package common
 
 import (
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -31,4 +33,56 @@ func RemoveDuplicates(xs *[]string) {
 		}
 	}
 	*xs = (*xs)[:j]
+}
+
+func HasElement(s interface{}, elem interface{}) bool {
+	arrV := reflect.ValueOf(s)
+
+	if arrV.Kind() == reflect.Slice {
+		for i := 0; i < arrV.Len(); i++ {
+
+			// XXX - panics if slice element points to an unexported struct field
+			// see https://golang.org/pkg/reflect/#Value.Interface
+			if arrV.Index(i).Interface() == elem {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func CoerceSliceStringToInt(sl []string) []int {
+	out := make([]int, 0)
+	for _, v := range sl {
+		iv, err := strconv.Atoi(v)
+		if err != nil {
+			continue
+		}
+		out = append(out, iv)
+	}
+	return out
+}
+
+func MinIntSlice(v []int) (m int) {
+	if len(v) > 0 {
+		m = v[0]
+	}
+	for i := 1; i < len(v); i++ {
+		if v[i] < m {
+			m = v[i]
+		}
+	}
+	return
+}
+
+func MaxIntSlice(v []int) (m int) {
+	if len(v) > 0 {
+		m = v[0]
+	}
+	for i := 1; i < len(v); i++ {
+		if v[i] > m {
+			m = v[i]
+		}
+	}
+	return
 }
