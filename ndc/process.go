@@ -134,71 +134,13 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Println(" - Writing new route.tsv")
-			err = common.TsvFromArrays(
-				"data/route.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
 
-			fmt.Println(" - Writing new producttype.tsv")
-			err = common.TsvFromArrays(
-				"data/producttype.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";"), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(" - Writing new dosageform.tsv")
-			err = common.TsvFromArrays(
-				"data/dosageform.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(" - Writing new strengthunit.tsv")
-			err = common.TsvFromArrays(
-				"data/strengthunit.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(" - Writing new pharmclass.tsv")
-			err = common.TsvFromArrays(
-				"data/pharmclass.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(" - Writing new drugname.tsv")
-			err = common.TsvFromArrays(
-				"data/drugname.tsv",
-				common.PrependUniqueIds(
-					common.OneToMultiArray(common.Derivatives(rec[1:], 3, ";"), true),
-				),
-			)
-			if err != nil {
-				panic(err)
-			}
+			newTsv("route.tsv", rec, 7, ";")
+			newTsv("producttype.tsv", rec, 2, ";")
+			newTsv("dosageform.tsv", rec, 6, ";")
+			newTsv("strengthunit.tsv", rec, 15, ";")
+			newTsv("pharmclass.tsv", rec, 16, ",")
+			newTsv("drugname.tsv", rec, 3, ";")
 		}
 
 		return
@@ -226,26 +168,47 @@ func main() {
 			"PharmClasses", // [16]
 			"DEASchedule",
 		}, rec[1:])
-		common.InsertsFromArrays("ndcDosageForm", []string{
-			"DosageFormName",
-		}, common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"), true))
 		common.InsertsFromArrays("ndcRoute", []string{
 			"RouteName",
 		}, common.OneToMultiArray(common.Derivatives(rec[1:], 7, ";"), true))
+		common.InsertsFromArrays("ndcProductType", []string{
+			"ProductType",
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 2, ";"), true))
+		common.InsertsFromArrays("ndcDosageForm", []string{
+			"DosageFormName",
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 6, ";"), true))
 		common.InsertsFromArrays("ndcStrengthUnit", []string{
 			"StrengthUnit",
 		}, common.OneToMultiArray(common.Derivatives(rec[1:], 15, ";"), true))
 		common.InsertsFromArrays("ndcPharmClass", []string{
 			"PharmClassName",
 		}, common.OneToMultiArray(common.Derivatives(rec[1:], 16, ","), true))
+		common.InsertsFromArrays("ndcDrugName", []string{
+			"DrugName",
+		}, common.OneToMultiArray(common.Derivatives(rec[1:], 3, ";"), true))
 		return
 	}
 
 	fmt.Printf("DosageForm : %#v\n", common.Derivatives(rec[1:], 6, ";"))
+	fmt.Printf("ProductType: %#v\n", common.Derivatives(rec[1:], 2, ";"))
 	fmt.Printf("Route : %#v\n", common.Derivatives(rec[1:], 7, ";"))
 	fmt.Printf("StrengthUnit : %#v\n", common.Derivatives(rec[1:], 15, ";"))
 	fmt.Printf("PharmClasses : %#v\n", common.Derivatives(rec[1:], 16, ","))
+	fmt.Printf("DrugName : %#v\n", common.Derivatives(rec[1:], 3, ";"))
 	//fmt.Printf("%#v", rec[1:])
+}
+
+func newTsv(tsvFile string, rec [][]string, sourceField int, delim string) {
+	fmt.Printf(" - Writing new %s\n", tsvFile)
+	err := common.TsvFromArrays(
+		"data/"+tsvFile,
+		common.PrependUniqueIds(
+			common.OneToMultiArray(common.Derivatives(rec[1:], sourceField, delim), true),
+		),
+	)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func mergeTsv(tsvFile string, rec [][]string, sourceField int, delim string) {
@@ -274,7 +237,7 @@ func mergeTsv(tsvFile string, rec [][]string, sourceField int, delim string) {
 				maxVal++
 				newEntries++
 				if *Debug {
-				fmt.Printf(" ! Found new element '%s' (%d)\n", piece, maxVal)
+					fmt.Printf(" ! Found new element '%s' (%d)\n", piece, maxVal)
 				}
 				raw = append(raw, []string{fmt.Sprintf("%d", maxVal), piece})
 				corpus = append(corpus, piece)
