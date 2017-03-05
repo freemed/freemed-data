@@ -107,9 +107,7 @@ func main() {
 			fmt.Println(" - Rewriting new ndc.tsv")
 			err := common.TsvFromArrays(
 				"data/ndc.tsv",
-				common.PrependUniqueIds(
-					rec,
-				),
+				rec[1:],
 			)
 			if err != nil {
 				panic(err)
@@ -127,9 +125,7 @@ func main() {
 			fmt.Println(" - Writing new ndc.tsv")
 			err := common.TsvFromArrays(
 				"data/ndc.tsv",
-				common.PrependUniqueIds(
-					rec,
-				),
+				rec[1:],
 			)
 			if err != nil {
 				panic(err)
